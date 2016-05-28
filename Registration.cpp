@@ -13,7 +13,23 @@ static std::vector<SoapySDR::Kwargs> findMultiSDR(const SoapySDR::Kwargs &args)
 {
     std::vector<SoapySDR::Kwargs> result;
 
-    //TODO
+    //find the maximum index
+    int maxIndex = -1;
+    for (const auto &pair : args)
+    {
+        if (not isIndexedName(pair.first)) continue;
+        size_t index = 0; splitIndexedName(pair.first, index);
+        if (int(index) > maxIndex) maxIndex = index;
+    }
+
+    //no indexed arguments specified
+    if (maxIndex < 0) return result;
+
+    //gather results at a specific device index
+    for (size_t index = 0; index <= size_t(maxIndex); index++)
+    {
+        
+    }
 
     return result;
 }

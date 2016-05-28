@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSL-1.0
 
 #pragma once
+#include "MultiNameUtils.hpp"
 #include <SoapySDR/Device.hpp>
 #include <vector>
 
