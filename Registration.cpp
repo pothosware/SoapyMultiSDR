@@ -39,7 +39,8 @@ static std::vector<SoapySDR::Kwargs> findMultiSDR(const SoapySDR::Kwargs &args)
  **********************************************************************/
 static SoapySDR::Device *makeMultiSDR(const SoapySDR::Kwargs &args)
 {
-    return new SoapyMultiSDR(args);
+    //TODO split args at the indexes
+    //return new SoapyMultiSDR(args);
 }
 
 /***********************************************************************

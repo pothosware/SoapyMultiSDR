@@ -4,28 +4,43 @@
 #pragma once
 #include "MultiNameUtils.hpp"
 #include <SoapySDR/Device.hpp>
+#include <utility> //pair
 #include <vector>
 
 class SoapyMultiSDR : public SoapySDR::Device
 {
 public:
-    SoapyMultiSDR(const SoapySDR::Kwargs &args);
+    SoapyMultiSDR(const std::vector<SoapySDR::Kwargs> &args);
     ~SoapyMultiSDR(void);
+
+    /*******************************************************************
+     * Channels API
+     ******************************************************************/
+
+    void setFrontendMapping(const int direction, const std::string &mapping);
+
+    std::string getFrontendMapping(const int direction) const;
+
+    size_t getNumChannels(const int direction) const;
+
+    bool getFullDuplex(const int direction, const size_t channel) const;
 
 private:
 
     //! Get the internal device pointer given the channel and direction
-    SoapySDR::Device *getDevice(const int direction, const size_t channel) const
+    SoapySDR::Device *getDevice(const int direction, const size_t channel, size_t &localChannel) const
     {
-        switch (direction)
-        {
-        case SOAPY_SDR_RX: return _rxDeviceMap.at(channel);
-        case SOAPY_SDR_TX: return _txDeviceMap.at(channel);
-        }
-        return nullptr;
+        const auto &map = (direction == SOAPY_SDR_RX)?_rxChanMap:_txChanMap;
+        const auto &pair = map.at(channel);
+        localChannel = pair.first;
+        return pair.second;
     }
 
+    //internal devices mapped by device index
+    std::vector<SoapySDR::Device *> _devices;
+
     //mapping of channel index to internal device pointer
-    std::vector<SoapySDR::Device *> _rxDeviceMap;
-    std::vector<SoapySDR::Device *> _txDeviceMap;
+    void reloadChanMaps(void);
+    std::vector<std::pair<size_t, SoapySDR::Device *>> _rxChanMap;
+    std::vector<std::pair<size_t, SoapySDR::Device *>> _txChanMap;
 };
