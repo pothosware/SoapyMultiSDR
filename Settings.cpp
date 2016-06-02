@@ -80,3 +80,95 @@ bool SoapyMultiSDR::getFullDuplex(const int direction, const size_t channel) con
     auto device = this->getDevice(direction, channel, localChannel);
     return device->getFullDuplex(direction, localChannel);
 }
+
+/*******************************************************************
+ * Antenna API
+ ******************************************************************/
+
+std::vector<std::string> SoapyMultiSDR::listAntennas(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->listAntennas(direction, localChannel);
+}
+
+void SoapyMultiSDR::setAntenna(const int direction, const size_t channel, const std::string &name)
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->setAntenna(direction, localChannel, name);
+}
+
+std::string SoapyMultiSDR::getAntenna(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getAntenna(direction, localChannel);
+}
+
+/*******************************************************************
+ * Frontend corrections API
+ ******************************************************************/
+
+bool SoapyMultiSDR::hasDCOffsetMode(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->hasDCOffsetMode(direction, localChannel);
+}
+
+void SoapyMultiSDR::setDCOffsetMode(const int direction, const size_t channel, const bool automatic)
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->setDCOffsetMode(direction, localChannel, automatic);
+}
+
+bool SoapyMultiSDR::getDCOffsetMode(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getDCOffsetMode(direction, localChannel);
+}
+
+bool SoapyMultiSDR::hasDCOffset(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->hasDCOffset(direction, localChannel);
+}
+
+void SoapyMultiSDR::setDCOffset(const int direction, const size_t channel, const std::complex<double> &offset)
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->setDCOffset(direction, localChannel, offset);
+}
+
+std::complex<double> SoapyMultiSDR::getDCOffset(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getDCOffset(direction, localChannel);
+}
+
+bool SoapyMultiSDR::hasIQBalance(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->hasIQBalance(direction, localChannel);
+}
+
+void SoapyMultiSDR::setIQBalance(const int direction, const size_t channel, const std::complex<double> &balance)
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->setIQBalance(direction, localChannel, balance);
+}
+
+std::complex<double> SoapyMultiSDR::getIQBalance(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getIQBalance(direction, localChannel);
+}
