@@ -172,3 +172,137 @@ std::complex<double> SoapyMultiSDR::getIQBalance(const int direction, const size
     auto device = this->getDevice(direction, channel, localChannel);
     return device->getIQBalance(direction, localChannel);
 }
+
+/*******************************************************************
+ * Gain API
+ ******************************************************************/
+
+std::vector<std::string> SoapyMultiSDR::listGains(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->listGains(direction, localChannel);
+}
+
+bool SoapyMultiSDR::hasGainMode(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->hasGainMode(direction, localChannel);
+}
+
+void SoapyMultiSDR::setGainMode(const int direction, const size_t channel, const bool automatic)
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->setGainMode(direction, localChannel, automatic);
+}
+
+bool SoapyMultiSDR::getGainMode(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getGainMode(direction, localChannel);
+}
+
+void SoapyMultiSDR::setGain(const int direction, const size_t channel, const double value)
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->setGain(direction, localChannel, value);
+}
+
+void SoapyMultiSDR::setGain(const int direction, const size_t channel, const std::string &name, const double value)
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->setGain(direction, localChannel, name, value);
+}
+
+double SoapyMultiSDR::getGain(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getGain(direction, localChannel);
+}
+
+double SoapyMultiSDR::getGain(const int direction, const size_t channel, const std::string &name) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getGain(direction, localChannel, name);
+}
+
+SoapySDR::Range SoapyMultiSDR::getGainRange(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getGainRange(direction, localChannel);
+}
+
+SoapySDR::Range SoapyMultiSDR::getGainRange(const int direction, const size_t channel, const std::string &name) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getGainRange(direction, localChannel, name);
+}
+
+/*******************************************************************
+ * Frequency API
+ ******************************************************************/
+
+void SoapyMultiSDR::setFrequency(const int direction, const size_t channel, const double frequency, const SoapySDR::Kwargs &args)
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->setFrequency(direction, localChannel, frequency, args);
+}
+
+void SoapyMultiSDR::setFrequency(const int direction, const size_t channel, const std::string &name, const double frequency, const SoapySDR::Kwargs &args)
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->setFrequency(direction, localChannel, name, frequency, args);
+}
+
+double SoapyMultiSDR::getFrequency(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getFrequency(direction, localChannel);
+}
+
+double SoapyMultiSDR::getFrequency(const int direction, const size_t channel, const std::string &name) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getFrequency(direction, localChannel, name);
+}
+
+std::vector<std::string> SoapyMultiSDR::listFrequencies(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->listFrequencies(direction, localChannel);
+}
+
+SoapySDR::RangeList SoapyMultiSDR::getFrequencyRange(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getFrequencyRange(direction, localChannel);
+}
+
+SoapySDR::RangeList SoapyMultiSDR::getFrequencyRange(const int direction, const size_t channel, const std::string &name) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getFrequencyRange(direction, localChannel, name);
+}
+
+SoapySDR::ArgInfoList SoapyMultiSDR::getFrequencyArgsInfo(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getFrequencyArgsInfo(direction, localChannel);
+}
