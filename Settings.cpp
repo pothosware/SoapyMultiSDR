@@ -451,3 +451,55 @@ void SoapyMultiSDR::setCommandTime(const long long timeNs, const std::string &wh
         device->setCommandTime(timeNs, what);
     }
 }
+
+/*******************************************************************
+ * Sensor API
+ ******************************************************************/
+
+std::vector<std::string> SoapyMultiSDR::listSensors(void) const
+{
+    std::vector<std::string> result;
+    for (size_t i = 0; i < _devices.size(); i++)
+    {
+        for (const auto &name : _devices[i]->listSensors())
+        {
+            result.push_back(toIndexedName(name, i));
+        }
+    }
+    return result;
+}
+
+SoapySDR::ArgInfo SoapyMultiSDR::getSensorInfo(const std::string &name) const
+{
+    size_t index = 0;
+    const auto localName = splitIndexedName(name, index);
+    return _devices[index]->getSensorInfo(localName);
+}
+
+std::string SoapyMultiSDR::readSensor(const std::string &name) const
+{
+    size_t index = 0;
+    const auto localName = splitIndexedName(name, index);
+    return _devices[index]->readSensor(localName);
+}
+
+std::vector<std::string> SoapyMultiSDR::listSensors(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->listSensors(direction, localChannel);
+}
+
+SoapySDR::ArgInfo SoapyMultiSDR::getSensorInfo(const int direction, const size_t channel, const std::string &name) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getSensorInfo(direction, localChannel, name);
+}
+
+std::string SoapyMultiSDR::readSensor(const int direction, const size_t channel, const std::string &name) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->readSensor(direction, localChannel, name);
+}
