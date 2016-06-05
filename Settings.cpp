@@ -503,3 +503,211 @@ std::string SoapyMultiSDR::readSensor(const int direction, const size_t channel,
     auto device = this->getDevice(direction, channel, localChannel);
     return device->readSensor(direction, localChannel, name);
 }
+
+/*******************************************************************
+ * Register API
+ ******************************************************************/
+
+std::vector<std::string> SoapyMultiSDR::listRegisterInterfaces(void) const
+{
+    std::vector<std::string> result;
+    for (size_t i = 0; i < _devices.size(); i++)
+    {
+        for (const auto &name : _devices[i]->listRegisterInterfaces())
+        {
+            result.push_back(toIndexedName(name, i));
+        }
+    }
+    return result;
+}
+
+void SoapyMultiSDR::writeRegister(const std::string &name, const unsigned addr, const unsigned value)
+{
+    size_t index = 0;
+    const auto localName = splitIndexedName(name, index);
+    return _devices[index]->writeRegister(localName, addr, value);
+}
+
+unsigned SoapyMultiSDR::readRegister(const std::string &name, const unsigned addr) const
+{
+    size_t index = 0;
+    const auto localName = splitIndexedName(name, index);
+    return _devices[index]->readRegister(localName, addr);
+}
+
+void SoapyMultiSDR::writeRegister(const unsigned addr, const unsigned value)
+{
+    return _devices[0]->writeRegister(addr, value);
+}
+
+unsigned SoapyMultiSDR::readRegister(const unsigned addr) const
+{
+    return _devices[0]->readRegister(addr);
+}
+
+/*******************************************************************
+ * Settings API
+ ******************************************************************/
+
+SoapySDR::ArgInfoList SoapyMultiSDR::getSettingInfo(void) const
+{
+    SoapySDR::ArgInfoList result;
+    for (size_t i = 0; i < _devices.size(); i++)
+    {
+        for (auto info : _devices[i]->getSettingInfo())
+        {
+            info.key = toIndexedName(info.key, i);
+            info.name += " - Device" + std::to_string(i);
+            result.push_back(info);
+        }
+    }
+    return result;
+}
+
+void SoapyMultiSDR::writeSetting(const std::string &key, const std::string &value)
+{
+    size_t index = 0;
+    const auto localKey = splitIndexedName(key, index);
+    return _devices[index]->writeSetting(localKey, value);
+}
+
+std::string SoapyMultiSDR::readSetting(const std::string &key) const
+{
+    size_t index = 0;
+    const auto localKey = splitIndexedName(key, index);
+    return _devices[index]->readSetting(localKey);
+}
+
+SoapySDR::ArgInfoList SoapyMultiSDR::getSettingInfo(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getSettingInfo(direction, localChannel);
+}
+
+void SoapyMultiSDR::writeSetting(const int direction, const size_t channel, const std::string &key, const std::string &value)
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->writeSetting(direction, localChannel, key, value);
+}
+
+std::string SoapyMultiSDR::readSetting(const int direction, const size_t channel, const std::string &key) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->readSetting(direction, localChannel, key);
+}
+
+/*******************************************************************
+ * GPIO API
+ ******************************************************************/
+
+std::vector<std::string> SoapyMultiSDR::listGPIOBanks(void) const
+{
+    std::vector<std::string> result;
+    for (size_t i = 0; i < _devices.size(); i++)
+    {
+        for (const auto &name : _devices[i]->listGPIOBanks())
+        {
+            result.push_back(toIndexedName(name, i));
+        }
+    }
+    return result;
+}
+
+void SoapyMultiSDR::writeGPIO(const std::string &bank, const unsigned value)
+{
+    size_t index = 0;
+    const auto localBank = splitIndexedName(bank, index);
+    return _devices[index]->writeGPIO(localBank, value);
+}
+
+void SoapyMultiSDR::writeGPIO(const std::string &bank, const unsigned value, const unsigned mask)
+{
+    size_t index = 0;
+    const auto localBank = splitIndexedName(bank, index);
+    return _devices[index]->writeGPIO(localBank, value, mask);
+}
+
+unsigned SoapyMultiSDR::readGPIO(const std::string &bank) const
+{
+    size_t index = 0;
+    const auto localBank = splitIndexedName(bank, index);
+    return _devices[index]->readGPIO(localBank);
+}
+
+void SoapyMultiSDR::writeGPIODir(const std::string &bank, const unsigned dir)
+{
+    size_t index = 0;
+    const auto localBank = splitIndexedName(bank, index);
+    return _devices[index]->writeGPIODir(localBank, dir);
+}
+
+void SoapyMultiSDR::writeGPIODir(const std::string &bank, const unsigned dir, const unsigned mask)
+{
+    size_t index = 0;
+    const auto localBank = splitIndexedName(bank, index);
+    return _devices[index]->writeGPIODir(localBank, dir, mask);
+}
+
+unsigned SoapyMultiSDR::readGPIODir(const std::string &bank) const
+{
+    size_t index = 0;
+    const auto localBank = splitIndexedName(bank, index);
+    return _devices[index]->readGPIODir(localBank);
+}
+
+/*******************************************************************
+ * I2C API
+ ******************************************************************/
+
+void SoapyMultiSDR::writeI2C(const int addr, const std::string &data)
+{
+    return _devices[0]->writeI2C(addr, data);
+}
+
+std::string SoapyMultiSDR::readI2C(const int addr, const size_t numBytes)
+{
+    return _devices[0]->readI2C(addr, numBytes);
+}
+
+/*******************************************************************
+ * SPI API
+ ******************************************************************/
+
+unsigned SoapyMultiSDR::transactSPI(const int addr, const unsigned data, const size_t numBits)
+{
+    return _devices[0]->transactSPI(addr, data, numBits);
+}
+
+/*******************************************************************
+ * UART API
+ ******************************************************************/
+
+std::vector<std::string> SoapyMultiSDR::listUARTs(void) const
+{
+    std::vector<std::string> result;
+    for (size_t i = 0; i < _devices.size(); i++)
+    {
+        for (const auto &name : _devices[i]->listUARTs())
+        {
+            result.push_back(toIndexedName(name, i));
+        }
+    }
+    return result;
+}
+
+void SoapyMultiSDR::writeUART(const std::string &which, const std::string &data)
+{
+    size_t index = 0;
+    const auto localUART = splitIndexedName(which, index);
+    return _devices[index]->writeUART(localUART, data);
+}
+
+std::string SoapyMultiSDR::readUART(const std::string &which, const long timeoutUs) const
+{
+    size_t index = 0;
+    const auto localUART = splitIndexedName(which, index);
+    return _devices[index]->readUART(localUART, timeoutUs);
+}
