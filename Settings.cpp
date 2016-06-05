@@ -363,3 +363,91 @@ SoapySDR::RangeList SoapyMultiSDR::getBandwidthRange(const int direction, const 
     auto device = this->getDevice(direction, channel, localChannel);
     return device->getBandwidthRange(direction, localChannel);
 }
+
+/*******************************************************************
+ * Clocking API
+ ******************************************************************/
+
+void SoapyMultiSDR::setMasterClockRate(const double rate)
+{
+    for (auto device : _devices)
+    {
+        device->setMasterClockRate(rate);
+    }
+}
+
+double SoapyMultiSDR::getMasterClockRate(void) const
+{
+    return _devices[0]->getMasterClockRate();
+}
+
+SoapySDR::RangeList SoapyMultiSDR::getMasterClockRates(void) const
+{
+    return _devices[0]->getMasterClockRates();
+}
+
+std::vector<std::string> SoapyMultiSDR::listClockSources(void) const
+{
+    return _devices[0]->listClockSources();
+}
+
+void SoapyMultiSDR::setClockSource(const std::string &source)
+{
+    for (auto device : _devices)
+    {
+        device->setClockSource(source);
+    }
+}
+
+std::string SoapyMultiSDR::getClockSource(void) const
+{
+    return _devices[0]->getClockSource();
+}
+
+/*******************************************************************
+ * Time API
+ ******************************************************************/
+
+std::vector<std::string> SoapyMultiSDR::listTimeSources(void) const
+{
+    return _devices[0]->listTimeSources();
+}
+
+void SoapyMultiSDR::setTimeSource(const std::string &source)
+{
+    for (auto device : _devices)
+    {
+        device->setTimeSource(source);
+    }
+}
+
+std::string SoapyMultiSDR::getTimeSource(void) const
+{
+    return _devices[0]->getTimeSource();
+}
+
+bool SoapyMultiSDR::hasHardwareTime(const std::string &what) const
+{
+    return _devices[0]->hasHardwareTime(what);
+}
+
+long long SoapyMultiSDR::getHardwareTime(const std::string &what) const
+{
+    return _devices[0]->getHardwareTime(what);
+}
+
+void SoapyMultiSDR::setHardwareTime(const long long timeNs, const std::string &what)
+{
+    for (auto device : _devices)
+    {
+        device->setHardwareTime(timeNs, what);
+    }
+}
+
+void SoapyMultiSDR::setCommandTime(const long long timeNs, const std::string &what)
+{
+    for (auto device : _devices)
+    {
+        device->setCommandTime(timeNs, what);
+    }
+}
