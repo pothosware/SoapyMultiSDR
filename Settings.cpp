@@ -57,15 +57,37 @@ void SoapyMultiSDR::reloadChanMaps(void)
  * Channels API
  ******************************************************************/
 
+static std::string trim(const std::string &s)
+{
+    std::string out = s;
+    while (not out.empty() and std::isspace(out[0])) out = out.substr(1);
+    while (not out.empty() and std::isspace(out[out.size()-1])) out = out.substr(0, out.size()-1);
+    return out;
+}
+
 void SoapyMultiSDR::setFrontendMapping(const int direction, const std::string &mapping)
 {
-    //TODO use multi-format for mapping
+    size_t pos = 0;
+    size_t index = 0;
+    while (not mapping.substr(pos).empty())
+    {
+        size_t commaPos = mapping.substr(pos).find(",");
+        const std::string mapping_i = mapping.substr(pos, commaPos-pos-1);
+        _devices[index++]->setFrontendMapping(direction, trim(mapping_i));
+        pos = commaPos;
+    }
     this->reloadChanMaps();
 }
 
 std::string SoapyMultiSDR::getFrontendMapping(const int direction) const
 {
-    //TODO multi-format for mapping
+    std::string result;
+    for (auto device : _devices)
+    {
+        if (not result.empty()) result += ", ";
+        result += device->getFrontendMapping(direction);
+    }
+    return result;
 }
 
 size_t SoapyMultiSDR::getNumChannels(const int direction) const
