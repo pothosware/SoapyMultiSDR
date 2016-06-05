@@ -306,3 +306,60 @@ SoapySDR::ArgInfoList SoapyMultiSDR::getFrequencyArgsInfo(const int direction, c
     auto device = this->getDevice(direction, channel, localChannel);
     return device->getFrequencyArgsInfo(direction, localChannel);
 }
+
+/*******************************************************************
+ * Sample Rate API
+ ******************************************************************/
+
+void SoapyMultiSDR::setSampleRate(const int direction, const size_t channel, const double rate)
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->setSampleRate(direction, localChannel, rate);
+}
+
+double SoapyMultiSDR::getSampleRate(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getSampleRate(direction, localChannel);
+}
+
+std::vector<double> SoapyMultiSDR::listSampleRates(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->listSampleRates(direction, localChannel);
+}
+
+/*******************************************************************
+ * Bandwidth API
+ ******************************************************************/
+
+void SoapyMultiSDR::setBandwidth(const int direction, const size_t channel, const double bw)
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->setBandwidth(direction, localChannel, bw);
+}
+
+double SoapyMultiSDR::getBandwidth(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getBandwidth(direction, localChannel);
+}
+
+std::vector<double> SoapyMultiSDR::listBandwidths(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->listBandwidths(direction, localChannel);
+}
+
+SoapySDR::RangeList SoapyMultiSDR::getBandwidthRange(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getBandwidthRange(direction, localChannel);
+}
