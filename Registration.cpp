@@ -56,12 +56,7 @@ static SoapySDR::Kwargs translateArgs(const SoapySDR::Kwargs &args, const size_t
     return argsOut;
 }
 
-/***********************************************************************
- * Discovery routine -- find acceptable multi-devices
- * Because single devices instances will be discoverable normally
- * this routine should only yield results when specifically invoked.
- **********************************************************************/
-static std::vector<SoapySDR::Kwargs> findMultiSDR(const SoapySDR::Kwargs &args)
+static std::vector<SoapySDR::Kwargs> translateArgs(const SoapySDR::Kwargs &args)
 {
     std::vector<SoapySDR::Kwargs> result;
 
@@ -77,12 +72,34 @@ static std::vector<SoapySDR::Kwargs> findMultiSDR(const SoapySDR::Kwargs &args)
     //no indexed arguments specified
     if (maxIndex < 0) return result;
 
+    //translate for each specific index
+    for (size_t index = 0; index <= size_t(maxIndex); index++)
+    {
+        result.push_back(translateArgs(args, index));
+    }
+
+    return result;
+}
+
+/***********************************************************************
+ * Discovery routine -- find acceptable multi-devices
+ * Because single devices instances will be discoverable normally
+ * this routine should only yield results when specifically invoked.
+ **********************************************************************/
+static std::vector<SoapySDR::Kwargs> findMultiSDR(const SoapySDR::Kwargs &args)
+{
+    std::vector<SoapySDR::Kwargs> result;
+
+    //split args into indexes for each device
+    const auto &argses = translateArgs(args);
+    if (argses.empty()) return result;
+
     //gather results at a specific device index
     //TODO handle multiple results
     SoapySDR::Kwargs result0;
-    for (size_t index = 0; index <= size_t(maxIndex); index++)
+    for (size_t index = 0; index < argses.size(); index++)
     {
-        const auto args_i = translateArgs(args, index);
+        const auto args_i = argses.at(index);
         const auto results_i = SoapySDR::Device::enumerate(args_i);
         if (results_i.empty()) return result; //nothing for this index
         for (const auto &resultArgs : results_i.front())
@@ -116,8 +133,16 @@ static std::vector<SoapySDR::Kwargs> findMultiSDR(const SoapySDR::Kwargs &args)
  **********************************************************************/
 static SoapySDR::Device *makeMultiSDR(const SoapySDR::Kwargs &args)
 {
-    //TODO split args at the indexes
-    //return new SoapyMultiSDR(args);
+    if (args.count(SOAPY_MULTI_KWARG_STOP) != 0) //probably wont happen
+    {
+        throw std::runtime_error("makeMultiSDR() -- factory loop");
+    }
+
+    //split args into indexes for each device
+    const auto &argses = translateArgs(args);
+    if (argses.empty()) throw std::runtime_error("makeMultiSDR() -- no indexed args");
+
+    return new SoapyMultiSDR(argses);
 }
 
 /***********************************************************************
