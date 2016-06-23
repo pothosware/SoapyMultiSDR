@@ -57,37 +57,24 @@ void SoapyMultiSDR::reloadChanMaps(void)
  * Channels API
  ******************************************************************/
 
-static std::string trim(const std::string &s)
-{
-    std::string out = s;
-    while (not out.empty() and std::isspace(out[0])) out = out.substr(1);
-    while (not out.empty() and std::isspace(out[out.size()-1])) out = out.substr(0, out.size()-1);
-    return out;
-}
-
 void SoapyMultiSDR::setFrontendMapping(const int direction, const std::string &mapping)
 {
-    size_t pos = 0;
-    size_t index = 0;
-    while (not mapping.substr(pos).empty())
+    const auto maps = csvSplit(mapping);
+    for (size_t i = 0; i < maps.size() and i < _devices.size(); i++)
     {
-        size_t commaPos = mapping.substr(pos).find(",");
-        const std::string mapping_i = mapping.substr(pos, commaPos-pos-1);
-        _devices[index++]->setFrontendMapping(direction, trim(mapping_i));
-        pos = commaPos;
+        _devices[i]->setFrontendMapping(direction, maps.at(i));
     }
     this->reloadChanMaps();
 }
 
 std::string SoapyMultiSDR::getFrontendMapping(const int direction) const
 {
-    std::string result;
+    std::vector<std::string> maps;
     for (auto device : _devices)
     {
-        if (not result.empty()) result += ", ";
-        result += device->getFrontendMapping(direction);
+        maps.push_back(device->getFrontendMapping(direction));
     }
-    return result;
+    return csvJoin(maps);
 }
 
 size_t SoapyMultiSDR::getNumChannels(const int direction) const
@@ -415,15 +402,21 @@ std::vector<std::string> SoapyMultiSDR::listClockSources(void) const
 
 void SoapyMultiSDR::setClockSource(const std::string &source)
 {
-    for (auto device : _devices)
+    const auto sources = csvSplit(source);
+    for (size_t i = 0; i < sources.size() and i < _devices.size(); i++)
     {
-        device->setClockSource(source);
+        _devices[i]->setClockSource(sources.at(i));
     }
 }
 
 std::string SoapyMultiSDR::getClockSource(void) const
 {
-    return _devices[0]->getClockSource();
+    std::vector<std::string> sources;
+    for (auto device : _devices)
+    {
+        sources.push_back(device->getClockSource());
+    }
+    return csvJoin(sources);
 }
 
 /*******************************************************************
@@ -437,15 +430,21 @@ std::vector<std::string> SoapyMultiSDR::listTimeSources(void) const
 
 void SoapyMultiSDR::setTimeSource(const std::string &source)
 {
-    for (auto device : _devices)
+    const auto sources = csvSplit(source);
+    for (size_t i = 0; i < sources.size() and i < _devices.size(); i++)
     {
-        device->setTimeSource(source);
+        _devices[i]->setTimeSource(sources.at(i));
     }
 }
 
 std::string SoapyMultiSDR::getTimeSource(void) const
 {
-    return _devices[0]->getTimeSource();
+    std::vector<std::string> sources;
+    for (auto device : _devices)
+    {
+        sources.push_back(device->getTimeSource());
+    }
+    return csvJoin(sources);
 }
 
 bool SoapyMultiSDR::hasHardwareTime(const std::string &what) const
