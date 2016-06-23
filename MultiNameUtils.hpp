@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: BSL-1.0
 
 #pragma once
+#include <SoapySDR/Config.hpp>
+#include <vector>
 #include <string>
 #include <cctype>
 #include <stdexcept>
@@ -35,4 +37,44 @@ static inline std::string splitIndexedName(const std::string &inName, size_t &in
     const size_t closeBracketPos = inName.find_last_of("]");
     index = std::stoul(inName.substr(openBracketPos+1, closeBracketPos-openBracketPos-1));
     return inName.substr(0, openBracketPos);
+}
+
+//! Split a comma-separated string into its components
+static inline std::vector<std::string> csvSplit(const std::string &in)
+{
+    std::vector<std::string> out;
+    std::string tmp;
+
+    //accumulate into tmp until comma is seen
+    for (const auto &ch : in)
+    {
+        if (ch == ',')
+        {
+            out.push_back(tmp);
+            tmp.clear();
+        }
+        else tmp += ch;
+    }
+    if (not tmp.empty()) out.push_back(tmp);
+
+    //trim out leading and trailing space
+    for (auto &s : out)
+    {
+        while (not s.empty() and std::isspace(s[0])) s = s.substr(1);
+        while (not s.empty() and std::isspace(s[s.size()-1])) s = s.substr(0, s.size()-1);
+    }
+
+    return out;
+}
+
+//! Join multiple strings into comma separated format
+static inline std::string csvJoin(const std::vector<std::string> &in)
+{
+    std::string out;
+    for (const auto &s : in)
+    {
+        if (not out.empty()) out += ", ";
+        out += s;
+    }
+    return out;
 }
