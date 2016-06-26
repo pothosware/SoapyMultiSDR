@@ -10,6 +10,11 @@ struct SoapyMultiStreamData
     std::vector<size_t> channels;
 };
 
+struct SoapyMultiStreamsData : std::vector<SoapyMultiStreamData>
+{
+    //placeholder for book-keeping common to all streams
+};
+
 /*******************************************************************
  * Stream API
  ******************************************************************/
@@ -46,7 +51,7 @@ SoapySDR::Stream *SoapyMultiSDR::setupStream(
     if (channels.empty()) channels.push_back(0);
 
     //stream the data structure
-    auto multiStreams = new std::vector<SoapyMultiStreamData>();
+    auto multiStreams = new SoapyMultiStreamsData();
 
     //iterate through the channels to fill the data structure
     for (const auto &channel : channels)
@@ -73,7 +78,7 @@ SoapySDR::Stream *SoapyMultiSDR::setupStream(
 
 void SoapyMultiSDR::closeStream(SoapySDR::Stream *stream)
 {
-    auto multiStreams = reinterpret_cast<std::vector<SoapyMultiStreamData> *>(stream);
+    auto multiStreams = reinterpret_cast<SoapyMultiStreamsData *>(stream);
     for (auto &multiStream : *multiStreams)
     {
         multiStream.device->closeStream(multiStream.stream);
@@ -83,7 +88,7 @@ void SoapyMultiSDR::closeStream(SoapySDR::Stream *stream)
 
 size_t SoapyMultiSDR::getStreamMTU(SoapySDR::Stream *stream) const
 {
-    auto multiStreams = reinterpret_cast<std::vector<SoapyMultiStreamData> *>(stream);
+    auto multiStreams = reinterpret_cast<SoapyMultiStreamsData *>(stream);
     const auto &stream0 = multiStreams->front();
     return stream0.device->getStreamMTU(stream0.stream);
 }
@@ -94,7 +99,13 @@ int SoapyMultiSDR::activateStream(
     const long long timeNs,
     const size_t numElems)
 {
-    
+    auto multiStreams = reinterpret_cast<SoapyMultiStreamsData *>(stream);
+    for (auto &multiStream : *multiStreams)
+    {
+        int ret = multiStream.device->activateStream(multiStream.stream, flags, timeNs, numElems);
+        if (ret != 0) return ret;
+    }
+    return 0;
 }
 
 int SoapyMultiSDR::deactivateStream(
@@ -102,7 +113,13 @@ int SoapyMultiSDR::deactivateStream(
     const int flags,
     const long long timeNs)
 {
-    
+    auto multiStreams = reinterpret_cast<SoapyMultiStreamsData *>(stream);
+    for (auto &multiStream : *multiStreams)
+    {
+        int ret = multiStream.device->deactivateStream(multiStream.stream, flags, timeNs);
+        if (ret != 0) return ret;
+    }
+    return 0;
 }
 
 int SoapyMultiSDR::readStream(
@@ -113,7 +130,41 @@ int SoapyMultiSDR::readStream(
     long long &timeNs,
     const long timeoutUs)
 {
-    
+    auto multiStreams = reinterpret_cast<SoapyMultiStreamsData *>(stream);
+
+    int ret = 0;
+    int offset = 0;
+    int originalFlags = flags;
+    int flagsOut = 0;
+    long long timeNsOut = 0;
+
+    for (auto &multiStream : *multiStreams)
+    {
+        flags = originalFlags; //restore flags before each call
+        ret = multiStream.device->readStream(multiStream.stream,
+            buffs+offset, numElems, flags, timeNs, timeoutUs);
+        if (ret <= 0) return ret;
+
+        //on the first readStream, store the output flags and time
+        if (offset == 0)
+        {
+            flagsOut = flags;
+            timeNsOut = timeNs;
+        }
+
+        offset += multiStream.channels.size();
+    }
+
+    //Note: ret represents the last read number of elements
+    //this should be homogeneous, but if not, this implementation
+    //should be improved to handle different length reads
+    //by saving the remainder and writing it into the buffer
+    //on subsequent calls and performing other book-keeping tasks.
+
+    //setup the result
+    flags = flagsOut;
+    timeNs = timeNsOut;
+    return ret;
 }
 
 int SoapyMultiSDR::writeStream(
@@ -124,7 +175,35 @@ int SoapyMultiSDR::writeStream(
     const long long timeNs,
     const long timeoutUs)
 {
-    
+    auto multiStreams = reinterpret_cast<SoapyMultiStreamsData *>(stream);
+
+    int ret = 0;
+    int offset = 0;
+    int originalFlags = flags;
+    int flagsOut = 0;
+
+    for (auto &multiStream : *multiStreams)
+    {
+        flags = originalFlags; //restore flags before each call
+        ret = multiStream.device->writeStream(multiStream.stream,
+            buffs+offset, numElems, flags, timeNs, timeoutUs);
+        if (ret <= 0) return ret;
+
+        //on the first writeStream, store the output flags
+        if (offset == 0) flagsOut = flags;
+
+        offset += multiStream.channels.size();
+    }
+
+    //Note: ret represents the last written number of elements
+    //this should be homogeneous, but if not, this implementation
+    //should be improved to handle different length writes
+    //by saving the remainder and reading it from the buffer
+    //on subsequent calls and performing other book-keeping tasks.
+
+    //setup the result
+    flags = flagsOut;
+    return ret;
 }
 
 int SoapyMultiSDR::readStreamStatus(
@@ -134,7 +213,24 @@ int SoapyMultiSDR::readStreamStatus(
     long long &timeNs,
     const long timeoutUs)
 {
-    
+    auto multiStreams = reinterpret_cast<SoapyMultiStreamsData *>(stream);
+
+    int ret = 0;
+    size_t offset = 0;
+    for (auto &multiStream : *multiStreams)
+    {
+        ret = multiStream.device->readStreamStatus(multiStream.stream,
+            chanMask, flags, timeNs, timeoutUs);
+
+        chanMask <<= offset; //mask bits shifted up for global channel mapping
+
+        if (ret == 0) return ret; //status message found
+
+        offset += multiStream.channels.size();
+    }
+
+    //return last-seen error code (probably timeout or not supported)
+    return ret;
 }
 
 /*******************************************************************
