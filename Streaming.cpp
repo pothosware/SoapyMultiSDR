@@ -3,6 +3,13 @@
 
 #include "SoapyMultiSDR.hpp"
 
+struct SoapyMultiStreamData
+{
+    SoapySDR::Device *device;
+    SoapySDR::Stream *stream;
+    std::vector<size_t> channels;
+};
+
 /*******************************************************************
  * Stream API
  ******************************************************************/
@@ -31,20 +38,54 @@ SoapySDR::ArgInfoList SoapyMultiSDR::getStreamArgsInfo(const int direction, cons
 SoapySDR::Stream *SoapyMultiSDR::setupStream(
     const int direction,
     const std::string &format,
-    const std::vector<size_t> &channels,
+    const std::vector<size_t> &channels_,
     const SoapySDR::Kwargs &args)
 {
-    
+    //ensure channels is at least size 1
+    std::vector<size_t> channels(channels_);
+    if (channels.empty()) channels.push_back(0);
+
+    //stream the data structure
+    auto multiStreams = new std::vector<SoapyMultiStreamData>();
+
+    //iterate through the channels to fill the data structure
+    for (const auto &channel : channels)
+    {
+        size_t localChannel = 0;
+        auto device = this->getDevice(direction, channel, localChannel);
+        if (multiStreams->empty() or multiStreams->back().device != device)
+        {
+            multiStreams->resize(multiStreams->size()+1);
+        }
+        multiStreams->back().device = device;
+        multiStreams->back().channels.push_back(localChannel);
+    }
+
+    //create the streams
+    for (auto &multiStream : *multiStreams)
+    {
+        multiStream.stream = multiStream.device->setupStream(
+            direction, format, multiStream.channels, args);
+    }
+
+    return reinterpret_cast<SoapySDR::Stream *>(multiStreams);
 }
 
 void SoapyMultiSDR::closeStream(SoapySDR::Stream *stream)
 {
-    
+    auto multiStreams = reinterpret_cast<std::vector<SoapyMultiStreamData> *>(stream);
+    for (auto &multiStream : *multiStreams)
+    {
+        multiStream.device->closeStream(multiStream.stream);
+    }
+    delete multiStreams;
 }
 
 size_t SoapyMultiSDR::getStreamMTU(SoapySDR::Stream *stream) const
 {
-    
+    auto multiStreams = reinterpret_cast<std::vector<SoapyMultiStreamData> *>(stream);
+    const auto &stream0 = multiStreams->front();
+    return stream0.device->getStreamMTU(stream0.stream);
 }
 
 int SoapyMultiSDR::activateStream(
