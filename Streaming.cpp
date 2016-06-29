@@ -239,12 +239,24 @@ int SoapyMultiSDR::readStreamStatus(
 
 size_t SoapyMultiSDR::getNumDirectAccessBuffers(SoapySDR::Stream *stream)
 {
-    
+    auto multiStreams = reinterpret_cast<SoapyMultiStreamsData *>(stream);
+    auto &multiStream0 = multiStreams->front();
+    return multiStream0.device->getNumDirectAccessBuffers(multiStream0.stream);
 }
 
 int SoapyMultiSDR::getDirectAccessBufferAddrs(SoapySDR::Stream *stream, const size_t handle, void **buffs)
 {
-    
+    auto multiStreams = reinterpret_cast<SoapyMultiStreamsData *>(stream);
+
+    size_t offset = 0;
+    for (auto &multiStream : *multiStreams)
+    {
+        int ret = multiStream.device->getDirectAccessBufferAddrs(multiStream.stream, handle, buffs+offset);
+        if (ret != 0) return ret;
+        offset += multiStream.channels.size();
+    }
+
+    return 0;
 }
 
 int SoapyMultiSDR::acquireReadBuffer(
@@ -255,14 +267,47 @@ int SoapyMultiSDR::acquireReadBuffer(
     long long &timeNs,
     const long timeoutUs)
 {
-    
+    auto multiStreams = reinterpret_cast<SoapyMultiStreamsData *>(stream);
+
+    int ret = 0;
+    int offset = 0;
+    int originalFlags = flags;
+    int flagsOut = 0;
+    long long timeNsOut = 0;
+
+    for (auto &multiStream : *multiStreams)
+    {
+        flags = originalFlags; //restore flags before each call
+        ret = multiStream.device->acquireReadBuffer(multiStream.stream,
+            handle, buffs+offset, flags, timeNs, timeoutUs);
+        if (ret <= 0) return ret;
+
+        //on the first readStream, store the output flags and time
+        if (offset == 0)
+        {
+            flagsOut = flags;
+            timeNsOut = timeNs;
+        }
+
+        offset += multiStream.channels.size();
+    }
+
+    //setup the result
+    flags = flagsOut;
+    timeNs = timeNsOut;
+    return ret;
 }
 
 void SoapyMultiSDR::releaseReadBuffer(
     SoapySDR::Stream *stream,
     const size_t handle)
 {
-    
+    auto multiStreams = reinterpret_cast<SoapyMultiStreamsData *>(stream);
+
+    for (auto &multiStream : *multiStreams)
+    {
+        multiStream.device->releaseReadBuffer(multiStream.stream, handle);
+    }
 }
 
 int SoapyMultiSDR::acquireWriteBuffer(
@@ -271,7 +316,19 @@ int SoapyMultiSDR::acquireWriteBuffer(
     void **buffs,
     const long timeoutUs)
 {
-    
+    auto multiStreams = reinterpret_cast<SoapyMultiStreamsData *>(stream);
+
+    int ret = 0;
+    int offset = 0;
+
+    for (auto &multiStream : *multiStreams)
+    {
+        multiStream.device->acquireWriteBuffer(multiStream.stream, handle, buffs+offset, timeoutUs);
+        if (ret <= 0) return ret;
+        offset += multiStream.channels.size();
+    }
+
+    return ret;
 }
 
 void SoapyMultiSDR::releaseWriteBuffer(
@@ -281,5 +338,23 @@ void SoapyMultiSDR::releaseWriteBuffer(
     int &flags,
     const long long timeNs)
 {
-    
+    auto multiStreams = reinterpret_cast<SoapyMultiStreamsData *>(stream);
+
+    int offset = 0;
+    int originalFlags = flags;
+    int flagsOut = 0;
+
+    for (auto &multiStream : *multiStreams)
+    {
+        flags = originalFlags; //restore flags before each call
+        multiStream.device->releaseWriteBuffer(multiStream.stream, handle, numElems, flags, timeNs);
+
+        //on the first writeStream, store the output flags
+        if (offset == 0) flagsOut = flags;
+
+        offset += multiStream.channels.size();
+    }
+
+    //setup the result
+    flags = flagsOut;
 }
