@@ -2,6 +2,10 @@
 
 Use multiple SoapySDR supported devices under a single device wrapper.
 
+##Dependencies
+
+* SoapySDR - https://github.com/pothosware/SoapySDR/wiki
+
 ##Documentation
 
 * https://github.com/pothosware/SoapyMultiSDR/wiki
