@@ -14,6 +14,16 @@ public:
     ~SoapyMultiSDR(void);
 
     /*******************************************************************
+     * Identification API
+     ******************************************************************/
+
+    std::string getDriverKey(void) const;
+
+    std::string getHardwareKey(void) const;
+
+    SoapySDR::Kwargs getHardwareInfo(void) const;
+
+    /*******************************************************************
      * Channels API
      ******************************************************************/
 
@@ -22,6 +32,8 @@ public:
     std::string getFrontendMapping(const int direction) const;
 
     size_t getNumChannels(const int direction) const;
+
+    SoapySDR::Kwargs getChannelInfo(const int direction, const size_t channel) const;
 
     bool getFullDuplex(const int direction, const size_t channel) const;
 

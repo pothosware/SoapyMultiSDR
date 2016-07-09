@@ -14,7 +14,7 @@ SoapyMultiSDR::SoapyMultiSDR(const std::vector<SoapySDR::Kwargs> &args)
     _devices.resize(args.size());
     for (size_t i = 0; i < args.size(); i++)
     {
-        SoapySDR::logf(SOAPY_SDR_INFO, "Making device %z...", i);
+        SoapySDR::logf(SOAPY_SDR_INFO, "Making device %d...", int(i));
         std::lock_guard<std::mutex> lock(factoryMutex);
         _devices[i] = SoapySDR::Device::make(args.at(i));
     }
@@ -54,6 +54,43 @@ void SoapyMultiSDR::reloadChanMaps(void)
 }
 
 /*******************************************************************
+ * Identification API
+ ******************************************************************/
+
+std::string SoapyMultiSDR::getDriverKey(void) const
+{
+    std::vector<std::string> keys;
+    for (auto device : _devices)
+    {
+        keys.push_back(device->getDriverKey());
+    }
+    return csvJoin(keys);
+}
+
+std::string SoapyMultiSDR::getHardwareKey(void) const
+{
+    std::vector<std::string> keys;
+    for (auto device : _devices)
+    {
+        keys.push_back(device->getHardwareKey());
+    }
+    return csvJoin(keys);
+}
+
+SoapySDR::Kwargs SoapyMultiSDR::getHardwareInfo(void) const
+{
+    SoapySDR::Kwargs result;
+    for (size_t i = 0; i < _devices.size(); i++)
+    {
+        for (const auto &pair : _devices[i]->getHardwareInfo())
+        {
+            result[toIndexedName(pair.first, i)] = pair.second;
+        }
+    }
+    return result;
+}
+
+/*******************************************************************
  * Channels API
  ******************************************************************/
 
@@ -81,6 +118,19 @@ size_t SoapyMultiSDR::getNumChannels(const int direction) const
 {
     const auto &map = (direction == SOAPY_SDR_RX)?_rxChanMap:_txChanMap;
     return map.size();
+}
+
+SoapySDR::Kwargs SoapyMultiSDR::getChannelInfo(const int direction, const size_t channel) const
+{
+    SoapySDR::Kwargs result;
+    for (size_t i = 0; i < _devices.size(); i++)
+    {
+        for (const auto &pair : _devices[i]->getChannelInfo(direction, channel))
+        {
+            result[toIndexedName(pair.first, i)] = pair.second;
+        }
+    }
+    return result;
 }
 
 bool SoapyMultiSDR::getFullDuplex(const int direction, const size_t channel) const
