@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2016 Josh Blum
+// Copyright (c) 2016-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include "SoapyMultiSDR.hpp"
@@ -230,6 +230,27 @@ std::complex<double> SoapyMultiSDR::getIQBalance(const int direction, const size
     size_t localChannel = 0;
     auto device = this->getDevice(direction, channel, localChannel);
     return device->getIQBalance(direction, localChannel);
+}
+
+bool SoapyMultiSDR::hasFrequencyCorrection(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->hasFrequencyCorrection(direction, localChannel);
+}
+
+void SoapyMultiSDR::setFrequencyCorrection(const int direction, const size_t channel, const double value)
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->setFrequencyCorrection(direction, localChannel, value);
+}
+
+double SoapyMultiSDR::getFrequencyCorrection(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getFrequencyCorrection(direction, localChannel);
 }
 
 /*******************************************************************
