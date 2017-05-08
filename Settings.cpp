@@ -412,6 +412,13 @@ std::vector<double> SoapyMultiSDR::listSampleRates(const int direction, const si
     return device->listSampleRates(direction, localChannel);
 }
 
+SoapySDR::RangeList SoapyMultiSDR::getSampleRateRange(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getSampleRateRange(direction, localChannel);
+}
+
 /*******************************************************************
  * Bandwidth API
  ******************************************************************/
