@@ -1,23 +1,14 @@
 // Copyright (c) 2016-2017 Josh Blum
+//                    2021 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #include "SoapyMultiSDR.hpp"
 #include <SoapySDR/Logger.hpp>
 #include <mutex>
 
-//mutex to protect the factory
-static std::mutex factoryMutex;
-
 SoapyMultiSDR::SoapyMultiSDR(const std::vector<SoapySDR::Kwargs> &args)
 {
-    //Create the device at each index
-    _devices.resize(args.size());
-    for (size_t i = 0; i < args.size(); i++)
-    {
-        SoapySDR::logf(SOAPY_SDR_INFO, "Making device %d...", int(i));
-        std::lock_guard<std::mutex> lock(factoryMutex);
-        _devices[i] = SoapySDR::Device::make(args.at(i));
-    }
+    _devices = SoapySDR::Device::make(args);
 
     //load the channels lookup
     this->reloadChanMaps();
@@ -25,13 +16,7 @@ SoapyMultiSDR::SoapyMultiSDR(const std::vector<SoapySDR::Kwargs> &args)
 
 SoapyMultiSDR::~SoapyMultiSDR(void)
 {
-    //cleanup each device
-    for (auto device : _devices)
-    {
-        if (device == nullptr) continue;
-        std::lock_guard<std::mutex> lock(factoryMutex);
-        SoapySDR::Device::unmake(device);
-    }
+    SoapySDR::Device::unmake(_devices);
 }
 
 void SoapyMultiSDR::reloadChanMaps(void)
@@ -230,6 +215,27 @@ std::complex<double> SoapyMultiSDR::getIQBalance(const int direction, const size
     size_t localChannel = 0;
     auto device = this->getDevice(direction, channel, localChannel);
     return device->getIQBalance(direction, localChannel);
+}
+
+bool SoapyMultiSDR::hasIQBalanceMode(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->hasIQBalanceMode(direction, localChannel);
+}
+
+void SoapyMultiSDR::setIQBalanceMode(const int direction, const size_t channel, const bool automatic)
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->setIQBalanceMode(direction, localChannel, automatic);
+}
+
+bool SoapyMultiSDR::getIQBalanceMode(const int direction, const size_t channel) const
+{
+    size_t localChannel = 0;
+    auto device = this->getDevice(direction, channel, localChannel);
+    return device->getIQBalanceMode(direction, localChannel);
 }
 
 bool SoapyMultiSDR::hasFrequencyCorrection(const int direction, const size_t channel) const
@@ -473,6 +479,24 @@ SoapySDR::RangeList SoapyMultiSDR::getMasterClockRates(void) const
     return _devices[0]->getMasterClockRates();
 }
 
+void SoapyMultiSDR::setReferenceClockRate(const double rate)
+{
+    for (auto device: _devices)
+    {
+        device->setReferenceClockRate(rate);
+    }
+}
+
+double SoapyMultiSDR::getReferenceClockRate(void) const
+{
+    return _devices[0]->getReferenceClockRate();
+}
+
+SoapySDR::RangeList SoapyMultiSDR::getReferenceClockRates(void) const
+{
+    return _devices[0]->getReferenceClockRates();
+}
+
 std::vector<std::string> SoapyMultiSDR::listClockSources(void) const
 {
     return _devices[0]->listClockSources();
@@ -642,6 +666,20 @@ void SoapyMultiSDR::writeRegister(const unsigned addr, const unsigned value)
 unsigned SoapyMultiSDR::readRegister(const unsigned addr) const
 {
     return _devices[0]->readRegister(addr);
+}
+
+void SoapyMultiSDR::writeRegisters(const std::string &name, const unsigned addr, const std::vector<unsigned> &value)
+{
+    size_t index = 0;
+    const auto localName = splitIndexedName(name, index);
+    return _devices[index]->writeRegisters(localName, addr, value);
+}
+
+std::vector<unsigned> SoapyMultiSDR::readRegisters(const std::string &name, const unsigned addr, const size_t length) const
+{
+    size_t index = 0;
+    const auto localName = splitIndexedName(name, index);
+    return _devices[index]->readRegisters(name, addr, length);
 }
 
 /*******************************************************************

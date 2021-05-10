@@ -156,6 +156,12 @@ public:
 
     std::complex<double> getIQBalance(const int direction, const size_t channel) const;
 
+    bool hasIQBalanceMode(const int direction, const size_t channel) const;
+
+    void setIQBalanceMode(const int direction, const size_t channel, const bool automatic);
+
+    bool getIQBalanceMode(const int direction, const size_t channel) const;
+
     bool hasFrequencyCorrection(const int direction, const size_t channel) const;
 
     void setFrequencyCorrection(const int direction, const size_t channel, const double value);
@@ -240,6 +246,12 @@ public:
 
     SoapySDR::RangeList getMasterClockRates(void) const;
 
+    void setReferenceClockRate(const double rate);
+
+    double getReferenceClockRate(void) const;
+
+    SoapySDR::RangeList getReferenceClockRates(void) const;
+
     std::vector<std::string> listClockSources(void) const;
 
     void setClockSource(const std::string &source);
@@ -293,6 +305,10 @@ public:
     void writeRegister(const unsigned addr, const unsigned value);
 
     unsigned readRegister(const unsigned addr) const;
+
+    void writeRegisters(const std::string &name, const unsigned addr, const std::vector<unsigned> &value);
+
+    std::vector<unsigned> readRegisters(const std::string &name, const unsigned addr, const size_t length) const;
 
     /*******************************************************************
      * Settings API
