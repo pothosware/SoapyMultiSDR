@@ -1,11 +1,12 @@
 ########################################################################
- # Build Soapy SDR support module for HackRF
- ########################################################################
-
-cmake_minimum_required(VERSION 2.8.7)
+# Build Multi Soapy SDR support module
+########################################################################
+cmake_minimum_required(VERSION 3.1.0)
 project(SoapyMultiSDR CXX)
 
-find_package(SoapySDR "0.4.0" NO_MODULE)
+set(CMAKE_CXX_STANDARD 11)
+
+find_package(SoapySDR 0.8 CONFIG)
 if (NOT SoapySDR_FOUND)
     message(FATAL_ERROR "Soapy SDR development files not found...")
 endif ()
