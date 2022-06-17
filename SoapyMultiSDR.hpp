@@ -1,4 +1,5 @@
 // Copyright (c) 2016-2017 Josh Blum
+//               2021-2022 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #pragma once
@@ -156,6 +157,12 @@ public:
 
     std::complex<double> getIQBalance(const int direction, const size_t channel) const;
 
+    bool hasIQBalanceMode(const int direction, const size_t channel) const;
+
+    void setIQBalanceMode(const int direction, const size_t channel, const bool automatic);
+
+    bool getIQBalanceMode(const int direction, const size_t channel) const;
+
     bool hasFrequencyCorrection(const int direction, const size_t channel) const;
 
     void setFrequencyCorrection(const int direction, const size_t channel, const double value);
@@ -240,6 +247,12 @@ public:
 
     SoapySDR::RangeList getMasterClockRates(void) const;
 
+    void setReferenceClockRate(const double rate);
+
+    double getReferenceClockRate(void) const;
+
+    SoapySDR::RangeList getReferenceClockRates(void) const;
+
     std::vector<std::string> listClockSources(void) const;
 
     void setClockSource(const std::string &source);
@@ -294,17 +307,25 @@ public:
 
     unsigned readRegister(const unsigned addr) const;
 
+    void writeRegisters(const std::string &name, const unsigned addr, const std::vector<unsigned> &value);
+
+    std::vector<unsigned> readRegisters(const std::string &name, const unsigned addr, const size_t length) const;
+
     /*******************************************************************
      * Settings API
      ******************************************************************/
 
     SoapySDR::ArgInfoList getSettingInfo(void) const;
 
+    SoapySDR::ArgInfo getSettingInfo(const std::string &key) const;
+
     void writeSetting(const std::string &key, const std::string &value);
 
     std::string readSetting(const std::string &key) const;
 
     SoapySDR::ArgInfoList getSettingInfo(const int direction, const size_t channel) const;
+
+    SoapySDR::ArgInfo getSettingInfo(const int direction, const size_t channel, const std::string &key) const;
 
     void writeSetting(const int direction, const size_t channel, const std::string &key, const std::string &value);
 
