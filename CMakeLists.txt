@@ -6,7 +6,7 @@ project(SoapyMultiSDR CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 
-find_package(SoapySDR 0.8 CONFIG)
+find_package(SoapySDR 0.8.1 CONFIG)
 if (NOT SoapySDR_FOUND)
     message(FATAL_ERROR "Soapy SDR development files not found...")
 endif ()

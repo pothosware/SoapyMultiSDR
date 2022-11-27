@@ -2,6 +2,10 @@
 
 Use multiple SoapySDR supported devices under a single device wrapper.
 
+## Build Status
+
+![Build Status](https://github.com/pothosware/SoapyMultiSDR/actions/workflows/ci.yml/badge.svg)
+
 ## Dependencies
 
 * SoapySDR - https://github.com/pothosware/SoapySDR/wiki
