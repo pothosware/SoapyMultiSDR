@@ -1,7 +1,7 @@
 ########################################################################
 # Build Multi Soapy SDR support module
 ########################################################################
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.1...3.10)
 project(SoapyMultiSDR CXX)
 
 set(CMAKE_CXX_STANDARD 11)
