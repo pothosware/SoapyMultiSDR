@@ -1,0 +1,5 @@
+# Ignore CMake generated output
+/build
+*~
+*.swp
+/.vscode
