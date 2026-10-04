@@ -60,7 +60,7 @@ jobs:
       CXX: ${{matrix.config.cxx}}
       INSTALL_PREFIX: /usr/local
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
           cd ${{runner.workspace}}
@@ -87,10 +87,6 @@ jobs:
       matrix:
         build_type: [Release, Debug]
         config:
-          - cc: gcc-12
-            cxx: g++-12
-            os: macos-15
-
           - cc: gcc-13
             cxx: g++-13
             os: macos-15
@@ -106,13 +102,18 @@ jobs:
           - cc: clang
             cxx: clang++
             os: macos-15
+
+          - cc: clang
+            cxx: clang++
+            os: macos-26
+
     runs-on: ${{matrix.config.os}}
     env:
       CC: ${{matrix.config.cc}}
       CXX: ${{matrix.config.cxx}}
       INSTALL_PREFIX: /usr/local
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
           cd ${{runner.workspace}}
@@ -144,10 +145,20 @@ jobs:
           #
           - cmake_config: -G "Visual Studio 17 2022" -A "Win32"
             arch: win32
-            os: windows-2025
+            os: windows-2022
             msvc: true
 
           - cmake_config: -G "Visual Studio 17 2022" -A "x64"
+            arch: x64
+            os: windows-2022
+            msvc: true
+
+          - cmake_config: -G "Visual Studio 18 2026" -A "Win32"
+            arch: win32
+            os: windows-2025
+            msvc: true
+
+          - cmake_config: -G "Visual Studio 18 2026" -A "x64"
             arch: x64
             os: windows-2025
             msvc: true
@@ -156,13 +167,13 @@ jobs:
           # MinGW
           #
           - cmake_config: -G "MinGW Makefiles"
-            os: windows-2025
+            os: windows-2022
             msvc: false
     runs-on: ${{matrix.config.os}}
     env:
       INSTALL_PREFIX: 'C:\Program Files\SoapySDR'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ilammy/msvc-dev-cmd@v1
         if:
           ${{matrix.config.msvc == true}}
@@ -172,10 +183,9 @@ jobs:
         run: |
           cd ${{runner.workspace}}
           # Build SoapySDR that supports OS X GCC modules
-          git clone https://github.com/pothosware/SoapySDR
+          git clone https://github.com/pothosware/SoapySDR --revision=1551ea0d39ce546b32a15808b9b1241018a89fc8
           cd SoapySDR
-          git checkout f8d57652d12f9d212f373a81e493eba1a0b058c5
-          cmake ${{matrix.config.cmake_config}} -DENABLE_PYTHON=OFF -DCMAKE_INSTALL_PREFIX="$Env:INSTALL_PREFIX" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -B build
+          cmake ${{matrix.config.cmake_config}} -DENABLE_PYTHON=OFF -DENABLE_PYTHON3=OFF -DCMAKE_INSTALL_PREFIX="$Env:INSTALL_PREFIX" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -B build
           cmake --build build --config ${{matrix.build_type}}
           cmake --install build --config ${{matrix.build_type}}
       - name: Build SoapyMultiSDR
@@ -196,10 +206,10 @@ jobs:
       fail-fast: false
       matrix:
         build_type: [Release, Debug]
-        release: ["13.5", "14.3", "15.0"]
+        release: ["13.5", "14.5", "15.1"]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: vmactions/freebsd-vm@v1
         name: Test in FreeBSD
         with:
