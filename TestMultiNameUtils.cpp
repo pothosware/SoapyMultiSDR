@@ -5,6 +5,7 @@
 #include "MultiNameUtils.hpp"
 #include <iostream>
 #include <cstdlib>
+#include <ciso646>
 
 int main(void)
 {

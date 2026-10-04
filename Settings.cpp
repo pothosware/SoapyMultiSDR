@@ -7,6 +7,7 @@
 #include <SoapySDR/Version.hpp>
 #include <mutex>
 #include <stdexcept>
+#include <ciso646>
 
 SoapyMultiSDR::SoapyMultiSDR(const std::vector<SoapySDR::Kwargs> &args)
 {

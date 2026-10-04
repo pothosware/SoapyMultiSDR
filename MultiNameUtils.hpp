@@ -24,7 +24,7 @@ static inline bool isIndexedName(const std::string &inName)
     if (closeBracketPos < openBracketPos) return false;
     for (size_t i = openBracketPos+1; i < closeBracketPos; i++)
     {
-        if (not std::isdigit(inName.at(i))) return false;
+        if (!std::isdigit(inName.at(i))) return false;
     }
     return true;
 }
@@ -32,7 +32,7 @@ static inline bool isIndexedName(const std::string &inName)
 //! Split an indexed name into internal name and index
 static inline std::string splitIndexedName(const std::string &inName, size_t &index)
 {
-    if (not isIndexedName(inName)) throw std::runtime_error("splitIndexedName("+inName+") not in name[index] format");
+    if (!isIndexedName(inName)) throw std::runtime_error("splitIndexedName("+inName+") not in name[index] format");
     const size_t openBracketPos = inName.find_last_of("[");
     const size_t closeBracketPos = inName.find_last_of("]");
     index = std::stoul(inName.substr(openBracketPos+1, closeBracketPos-openBracketPos-1));
@@ -55,13 +55,13 @@ static inline std::vector<std::string> csvSplit(const std::string &in)
         }
         else tmp += ch;
     }
-    if (not tmp.empty()) out.push_back(tmp);
+    if (!tmp.empty()) out.push_back(tmp);
 
     //trim out leading and trailing space
     for (auto &s : out)
     {
-        while (not s.empty() and std::isspace(s[0])) s = s.substr(1);
-        while (not s.empty() and std::isspace(s[s.size()-1])) s = s.substr(0, s.size()-1);
+        while (!s.empty() && std::isspace(s[0])) s = s.substr(1);
+        while (!s.empty() && std::isspace(s[s.size()-1])) s = s.substr(0, s.size()-1);
     }
 
     return out;
@@ -73,7 +73,7 @@ static inline std::string csvJoin(const std::vector<std::string> &in)
     std::string out;
     for (const auto &s : in)
     {
-        if (not out.empty()) out += ", ";
+        if (!out.empty()) out += ", ";
         out += s;
     }
     return out;

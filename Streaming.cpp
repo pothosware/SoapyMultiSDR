@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSL-1.0
 
 #include "SoapyMultiSDR.hpp"
+#include <ciso646>
 
 struct SoapyMultiStreamData
 {

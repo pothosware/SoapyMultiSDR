@@ -3,6 +3,7 @@
 
 #include "SoapyMultiSDR.hpp"
 #include <SoapySDR/Registry.hpp>
+#include <ciso646>
 
 //! Use this magic stop key in the server to prevent infinite loops
 #define SOAPY_MULTI_KWARG_STOP "soapy_multi_no_deeper"
